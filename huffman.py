@@ -9,10 +9,44 @@ except:
     import pickle
 
 def code(msg):
-    raise NotImplementedError
+    # unique characters and number of occurrences in msg
+    chars = {}
+    # binary representation of msg
+    string = ''
+    # binary tree representation of msg
+    tree = []
+
+    # take count of unique characters in msg
+    for c in msg:
+        if c not in chars:
+            chars[c] = 1
+        else:
+            chars[c] += 1
+
+    # build the initial forest
+    for c in chars:
+        x = (c[1], c[0]) # (frequency, subtree)
+        tree.append(x)
+
+    # sort by frequency
+    tree.sort(key = lambda t: t[0])
+
+    # combine the trees
+    for t in tree:
+        for z in tree:
+            if t == z:
+                continue
+            t[0] += z[0]
+            t[1] = [t[1]] + [z[1]]
+
+    print(chars) # TEMP print out chars to verify
+    print(tree) # TEMP pring out tree to verify
+
+    return (string, tree)
 
 def decode(str, decoderRing):
-    raise NotImplementedError
+    msg = ''
+    return msg
 
 def compress(msg):
     raise NotImplementedError
