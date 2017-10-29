@@ -25,19 +25,21 @@ def code(msg):
 
     # build the initial forest
     for c in chars:
-        x = (c[1], c[0]) # (frequency, subtree)
+        x = (c[1], [c[0]]) # (frequency, subtree)
         tree.append(x)
 
     # sort by frequency
     tree.sort(key = lambda t: t[0])
 
     # combine the trees
-    for t in tree:
-        for z in tree:
-            if t == z:
-                continue
-            t[0] += z[0]
-            t[1] = [t[1]] + [z[1]]
+    while len(tree) > 1:
+        for t in tree:
+            for z in tree:
+                if t == z:
+                    continue
+                z[0] += t[0]
+                z[1] += t[1]
+                tree.remove(t)
 
     print(chars) # TEMP print out chars to verify
     print(tree) # TEMP pring out tree to verify
