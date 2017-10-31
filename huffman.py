@@ -10,7 +10,7 @@ except:
 
 def code(msg):
     # unique characters and number of occurrences in msg
-    chars = {}
+    chars = dict()
     # binary representation of msg
     string = ''
     # binary tree representation of msg
@@ -20,16 +20,22 @@ def code(msg):
     for c in msg:
         if c not in chars:
             chars[c] = 1
+            print(c + " " + str(chars[c]) + " times") # TEMP
         else:
             chars[c] += 1
+            print(c + " " + str(chars[c]) + " times") # TEMP
+
+    print(chars) # TEMP print out chars to verify
 
     # build the initial forest
-    for c in chars:
-        x = (c[1], [c[0]]) # (frequency, subtree)
+    for (char, count) in chars.items():
+        x = (count, char) # (frequency, subtree)
         tree.append(x)
 
     # sort by frequency
     tree.sort(key = lambda t: t[0])
+
+    print(tree) # TEMP print out tree to verify
 
     # combine the trees
     while len(tree) > 1:
@@ -37,12 +43,17 @@ def code(msg):
             for z in tree:
                 if t == z:
                     continue
-                z[0] += t[0]
-                z[1] += t[1]
+                weight = z[0] + t[0]
+                subtree = None
+                if z[1] is array:
+                    subtree = z[1] + t[1]
+                else:
+                    subtree = [t, z]
+                z = (weight, subtree)
+                print(z) # TEMP
                 tree.remove(t)
 
-    print(chars) # TEMP print out chars to verify
-    print(tree) # TEMP pring out tree to verify
+    print(tree) # TEMP
 
     return (string, tree)
 
@@ -59,6 +70,8 @@ def decompress(str, decoderRing):
 def usage():
     sys.stderr.write("Usage: {} [-c|-d|-v|-w] infile outfile\n".format(sys.argv[0]))
     exit(1)
+
+code('hello')
 
 if __name__=='__main__':
     if len(sys.argv) != 4:
