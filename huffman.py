@@ -8,12 +8,34 @@ try:
 except:
     import pickle
 
+'''
+Traverses a given huffman tree and returns the binary
+string representation.
+'''
+def traverse(root, string = [], top = 0):
+    if len(root[1]) > 1:
+        s = string
+        s.append('0')
+
+        t = string
+        t.append('1')
+
+        # traverse left and right
+        return traverse(root[1][1], s, top + 1) + \
+        traverse(root[1][0], t, top + 1)
+
+    # check if root is a leaf
+    if root[1] is not list:
+        return string
+
 def code(msg):
-    # unique characters and number of occurrences in msg
-    chars = dict()
-    # binary representation of msg
-    string = ''
-    # binary tree representation of msg
+    # case should msg be an empty string
+    if msg == '':
+        return ('', [])
+
+    # Invariant (init): unique characters and number of occurrences in msg
+    chars = {}
+    # Invariant (init): binary tree representation of msg
     tree = []
 
     # take count of unique characters in msg
@@ -23,32 +45,35 @@ def code(msg):
         else:
             chars[c] += 1
 
-    print(chars) # TEMP print out chars to verify
-
     # build the initial forest
     for (char, count) in chars.items():
         x = (count, char) # (frequency, subtree)
         tree.append(x)
 
-    # sort by frequency
-    tree.sort(key = lambda t: t[0])
+    # Invariant (maint): sort by frequency
+    # This sorting by frequency will only occur once.
+    tree.sort(key = lambda s: s[0])
 
-    # combine the trees
+    # merge the forest into single tree
     while len(tree) > 1:
         for (i, s) in enumerate(tree):
             next_i = (i + 1) % len(tree)
             t = tree[next_i]
             weight = t[0] + s[0]
             subtree = None
-            if t[1] is array:
-                subtree = t[1] + s[1]
+            if t[1] is list:
+                subtree = s[1] + t[1]
             else:
                 subtree = [s, t]
+            subtree.sort(key = lambda s: s[0])
             tree[next_i] = (weight, subtree)
-            print(tree) # TEMP
             tree.remove(s)
 
     print(tree) # TEMP
+
+    # Invariant (init): binary representation of msg
+    string = ''.join(traverse(tree[0]))
+    #print(string) # TEMP
 
     return (string, tree)
 
