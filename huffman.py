@@ -20,10 +20,8 @@ def code(msg):
     for c in msg:
         if c not in chars:
             chars[c] = 1
-            print(c + " " + str(chars[c]) + " times") # TEMP
         else:
             chars[c] += 1
-            print(c + " " + str(chars[c]) + " times") # TEMP
 
     print(chars) # TEMP print out chars to verify
 
@@ -35,23 +33,20 @@ def code(msg):
     # sort by frequency
     tree.sort(key = lambda t: t[0])
 
-    print(tree) # TEMP print out tree to verify
-
     # combine the trees
     while len(tree) > 1:
-        for t in tree:
-            for z in tree:
-                if t == z:
-                    continue
-                weight = z[0] + t[0]
-                subtree = None
-                if z[1] is array:
-                    subtree = z[1] + t[1]
-                else:
-                    subtree = [t, z]
-                z = (weight, subtree)
-                print(z) # TEMP
-                tree.remove(t)
+        for (i, s) in enumerate(tree):
+            next_i = (i + 1) % len(tree)
+            t = tree[next_i]
+            weight = t[0] + s[0]
+            subtree = None
+            if t[1] is array:
+                subtree = t[1] + s[1]
+            else:
+                subtree = [s, t]
+            tree[next_i] = (weight, subtree)
+            print(tree) # TEMP
+            tree.remove(s)
 
     print(tree) # TEMP
 
@@ -70,8 +65,6 @@ def decompress(str, decoderRing):
 def usage():
     sys.stderr.write("Usage: {} [-c|-d|-v|-w] infile outfile\n".format(sys.argv[0]))
     exit(1)
-
-code('hello')
 
 if __name__=='__main__':
     if len(sys.argv) != 4:
