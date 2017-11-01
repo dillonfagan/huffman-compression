@@ -14,15 +14,9 @@ string representation.
 '''
 def traverse(root, string = [], top = 0):
     if len(root[1]) > 1:
-        s = string
-        s.append('0')
-
-        t = string
-        t.append('1')
-
         # traverse left and right
-        return traverse(root[1][1], s, top + 1) + \
-        traverse(root[1][0], t, top + 1)
+        return traverse(root[1][0], string + ['1'], top + 1) + \
+        traverse(root[1][1], string + ['0'], top + 1)
 
     # check if root is a leaf
     if root[1] is not list:
@@ -57,23 +51,22 @@ def code(msg):
     # merge the forest into single tree
     while len(tree) > 1:
         for (i, s) in enumerate(tree):
-            next_i = (i + 1) % len(tree)
-            t = tree[next_i]
+            j = (i + 1) % len(tree)
+            t = tree[j]
             weight = t[0] + s[0]
             subtree = None
             if t[1] is list:
                 subtree = s[1] + t[1]
             else:
                 subtree = [s, t]
-            subtree.sort(key = lambda s: s[0])
-            tree[next_i] = (weight, subtree)
+            tree[j] = (weight, subtree)
             tree.remove(s)
 
+    print(chars) # TEMP
     print(tree) # TEMP
 
     # Invariant (init): binary representation of msg
     string = ''.join(traverse(tree[0]))
-    #print(string) # TEMP
 
     return (string, tree)
 
