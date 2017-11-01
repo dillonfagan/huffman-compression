@@ -8,19 +8,33 @@ try:
 except:
     import pickle
 
-'''
-Traverses a given huffman tree and returns the binary
-string representation.
-'''
-def traverse(root, string = [], top = 0):
-    if len(root[1]) > 1:
-        # traverse left and right
-        return traverse(root[1][0], string + ['1'], top + 1) + \
-        traverse(root[1][1], string + ['0'], top + 1)
+class Node:
+    def __init__(self, char, weight, left = None, right = None):
+        self.char = char
+        self.weight = weight
+        self.left = left
+        self.right = right
 
-    # check if root is a leaf
-    if root[1] is not list:
-        return string
+    def __lt__(self):
+        self.weight
+
+    def __gt__(self):
+        self.weight
+
+    def __le__(self):
+        self.weight
+
+    def __ge__(self):
+        self.weight
+
+    def is_leaf(self):
+        return not self.left and not self.right
+
+def create_codes(root, codes = {}):
+    if not root.is_leaf():
+        create_codes(root.left, codes)
+        create_codes(root.right, codes)
+    return codes
 
 def code(msg):
     # case should msg be an empty string
@@ -30,7 +44,7 @@ def code(msg):
     # Invariant (init): unique characters and number of occurrences in msg
     chars = {}
     # Invariant (init): binary tree representation of msg
-    tree = []
+    f = []
 
     # take count of unique characters in msg
     for c in msg:
@@ -40,35 +54,37 @@ def code(msg):
             chars[c] += 1
 
     # build the initial forest
-    for (char, count) in chars.items():
-        x = (count, char) # (frequency, subtree)
-        tree.append(x)
-
-    # Invariant (maint): sort by frequency
-    # This sorting by frequency will only occur once.
-    tree.sort(key = lambda s: s[0])
+    for (char, weight) in chars.items():
+        x = Node(char, weight)
+        f.append(x)
 
     # merge the forest into single tree
-    while len(tree) > 1:
-        for (i, s) in enumerate(tree):
-            j = (i + 1) % len(tree)
-            t = tree[j]
-            weight = t[0] + s[0]
-            subtree = None
-            if t[1] is list:
-                subtree = s[1] + t[1]
-            else:
-                subtree = [s, t]
-            tree[j] = (weight, subtree)
-            tree.remove(s)
+    while len(f) > 1:
+        # Invariant (maint): sort by frequency
+        f.sort(key = lambda x: x.weight)
+        # get node with lowest weight
+        s = f[0]
+        f.remove(s)
+        # get node with second lowest weight
+        t = f[0]
+        f.remove(t)
+        # make new root node with lowest and second lowest as children
+        root = Node(s.char, s.weight + t.weight, s, t)
+        f.append(root)
+
+    nodes_walked = 0
+    while nodes_walked < len(chars):
+        pass
+
+    codes = create_codes(f[0])
 
     print(chars) # TEMP
-    print(tree) # TEMP
+    print(f[0].char, f[0].weight) # TEMP
 
     # Invariant (init): binary representation of msg
-    string = ''.join(traverse(tree[0]))
+    string = ''
 
-    return (string, tree)
+    return (string, f[0])
 
 def decode(str, decoderRing):
     msg = ''
