@@ -17,12 +17,10 @@ def traverse(tree, bincode = '', codes = {}):
         if type(subtree[1]) is not list:
             # leaf reached
             bincode += str(i)
+            codes[subtree[1]] = bincode
         else:
             bincode += str(i)
             traverse(subtree[1], bincode, codes)
-
-        if type(subtree[1]) is not list:
-            codes[subtree[1]] = bincode
 
         bincode = bincode[:-1]
     return codes
@@ -67,15 +65,29 @@ def code(msg):
         tree.append((weight, subtree))
         tree.sort(key = lambda s: s[0])
 
-    print(tree) # TEMP
-
     codes = traverse(tree)
-    print(codes) # TEMP
+
+    string = ''
+    for c in msg:
+        string += codes[c]
+
+    original = decode(string, tree)
+    print(original)
 
     return (string, tree)
 
 def decode(string, decoderRing):
     msg = ''
+    codes = traverse(decoderRing)
+    bincode = ''
+    for d in string:
+        bincode += d
+        if bincode in codes.values():
+            for (char, code) in codes.items():
+                if code == bincode:
+                    msg += char
+            bincode = ''
+
     return msg
 
 def compress(msg):
