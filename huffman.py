@@ -71,9 +71,6 @@ def code(msg):
     for c in msg:
         string += codes[c]
 
-    original = decode(string, tree)
-    print(original)
-
     return (string, tree)
 
 def decode(string, decoderRing):
