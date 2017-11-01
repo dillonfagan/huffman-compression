@@ -10,17 +10,22 @@ except:
 
 '''
 Traverses a given huffman tree and returns the binary
-string representation.
+code dictionary.
 '''
-def traverse(root, string = [], top = 0):
-    if len(root[1]) > 1:
-        # traverse left and right
-        return traverse(root[1][0], string + ['1'], top + 1) + \
-        traverse(root[1][1], string + ['0'], top + 1)
+def traverse(tree, bincode = '', codes = {}):
+    for (i, subtree) in enumerate(tree):
+        if type(subtree[1]) is not list:
+            # leaf reached
+            bincode += str(i)
+        else:
+            bincode += str(i)
+            traverse(subtree[1], bincode, codes)
 
-    # check if root is a leaf
-    if root[1] is not list:
-        return string
+        if type(subtree[1]) is not list:
+            codes[subtree[1]] = bincode
+
+        bincode = bincode[:-1]
+    return codes
 
 def code(msg):
     # case should msg be an empty string
@@ -49,35 +54,34 @@ def code(msg):
     tree.sort(key = lambda s: s[0])
 
     # merge the forest into single tree
-    while len(tree) > 1:
-        for (i, s) in enumerate(tree):
-            j = (i + 1) % len(tree)
-            t = tree[j]
-            weight = t[0] + s[0]
-            subtree = None
-            if t[1] is list:
-                subtree = s[1] + t[1]
-            else:
-                subtree = [s, t]
-            tree[j] = (weight, subtree)
-            tree.remove(s)
+    while len(tree) > 2:
+        s = tree[0]
+        tree.remove(s)
 
-    print(chars) # TEMP
+        t = tree[0]
+        tree.remove(t)
+
+        weight = t[0] + s[0]
+        subtree = [s, t]
+
+        tree.append((weight, subtree))
+        tree.sort(key = lambda s: s[0])
+
     print(tree) # TEMP
 
-    # Invariant (init): binary representation of msg
-    string = ''.join(traverse(tree[0]))
+    codes = traverse(tree)
+    print(codes) # TEMP
 
     return (string, tree)
 
-def decode(str, decoderRing):
+def decode(string, decoderRing):
     msg = ''
     return msg
 
 def compress(msg):
     raise NotImplementedError
 
-def decompress(str, decoderRing):
+def decompress(string, decoderRing):
     raise NotImplementedError
 
 def usage():
@@ -109,15 +113,15 @@ if __name__=='__main__':
 
     if compressing or encoding:
         fp = open(infile, 'rb')
-        str = fp.read()
+        string = fp.read()
         fp.close()
         if compressing:
-            msg, tree = compress(str)
+            msg, tree = compress(string)
             fcompressed = open(outfile, 'wb')
             marshal.dump((pickle.dumps(tree), msg), fcompressed)
             fcompressed.close()
         else:
-            msg, tree = code(str)
+            msg, tree = code(string)
             print(msg)
             fcompressed = open(outfile, 'wb')
             marshal.dump((pickle.dumps(tree), msg), fcompressed)
@@ -128,10 +132,10 @@ if __name__=='__main__':
         tree = pickle.loads(pickleRick)
         fp.close()
         if decompressing:
-            str = decompress(msg, tree)
+            string = decompress(msg, tree)
         else:
-            str = decode(msg, tree)
-            print(str)
+            string = decode(msg, tree)
+            print(string)
         fp = open(outfile, 'wb')
-        fp.write(str)
+        fp.write(string)
         fp.close()
