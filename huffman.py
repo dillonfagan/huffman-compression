@@ -101,8 +101,7 @@ def compress(msg):
         else:
             buf = (buf << 1) | 1
         count += 1
-        print(buf)
-        if ((buf << 1) | 1) > 255:
+        if count == 8:
             bitstream.append(buf)
             count = 0
             buf = 0
@@ -110,6 +109,10 @@ def compress(msg):
     return (bitstream, tree)
 
 def decompress(string, decoderRing):
+    buf = 0
+    for bit in string:
+        if bit == 0:
+            buf = (buf >> 1)
     raise NotImplementedError
 
 def usage():
