@@ -14,14 +14,13 @@ code dictionary.
 '''
 def traverse(tree, bincode = '', codes = {}):
     for (i, subtree) in enumerate(tree):
+        # append 0 or 1 to binary code
+        bincode += str(i)
         if type(subtree[1]) is not list:
             # leaf reached
-            bincode += str(i)
             codes[subtree[1]] = bincode
         else:
-            bincode += str(i)
             traverse(subtree[1], bincode, codes)
-
         bincode = bincode[:-1]
     return codes
 
@@ -32,30 +31,31 @@ def code(msg):
 
     # Invariant (init): unique characters and number of occurrences in msg
     chars = {}
-    # Invariant (init): binary tree representation of msg
-    tree = []
-
     # take count of unique characters in msg
     for c in msg:
         if c not in chars:
             chars[c] = 1
         else:
+            # Invariant (maint): increment occurrences for each pass
             chars[c] += 1
 
+    # Invariant (init): binary tree representation of msg
+    tree = []
     # build the initial forest
     for (char, count) in chars.items():
         x = (count, char) # (frequency, subtree)
         tree.append(x)
 
-    # Invariant (maint): sort by frequency
-    # This sorting by frequency will only occur once.
+    # Invariant (maint): sort forest by weight of each subtree
     tree.sort(key = lambda s: s[0])
 
-    # merge the forest into single tree
+    # merge the forest into two subtrees
     while len(tree) > 2:
+        # get subtree with lowest weight
         s = tree[0]
         tree.remove(s)
 
+        # get subtree with second lowest weight
         t = tree[0]
         tree.remove(t)
 
@@ -65,8 +65,10 @@ def code(msg):
         tree.append((weight, subtree))
         tree.sort(key = lambda s: s[0])
 
+    # build codebook
     codes = traverse(tree)
 
+    # assemble binary string from codebook
     string = ''
     for c in msg:
         string += codes[c]
@@ -77,18 +79,35 @@ def decode(string, decoderRing):
     msg = ''
     codes = traverse(decoderRing)
     bincode = ''
-    for d in string:
-        bincode += d
+    for bit in string:
+        bincode += bit
         if bincode in codes.values():
             for (char, code) in codes.items():
                 if code == bincode:
                     msg += char
             bincode = ''
-
     return msg
 
 def compress(msg):
-    raise NotImplementedError
+    string, tree = code(msg)
+
+    bitstream = array.array('B')
+    buf = 0
+    count = 0
+
+    for bit in string:
+        if bit == '0':
+            buf = (buf << 1)
+        else:
+            buf = (buf << 1) | 1
+        count += 1
+        print(buf)
+        if ((buf << 1) | 1) > 255:
+            bitstream.append(buf)
+            count = 0
+            buf = 0
+    bitstream.append(buf)
+    return (bitstream, tree)
 
 def decompress(string, decoderRing):
     raise NotImplementedError
