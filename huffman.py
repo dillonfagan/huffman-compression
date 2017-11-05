@@ -24,6 +24,7 @@ def traverse(tree, bincode = '', codes = {}):
         bincode = bincode[:-1]
     return codes
 
+
 def code(msg):
     # case should msg be an empty string
     if msg == '':
@@ -75,6 +76,7 @@ def code(msg):
 
     return (string, tree)
 
+
 def decode(string, decoderRing):
     msg = ''
     codes = traverse(decoderRing)
@@ -88,36 +90,66 @@ def decode(string, decoderRing):
             bincode = ''
     return msg
 
+
 def compress(msg):
-    string, tree = code(msg)
+    string, tree = code(msg); print(string)
 
     bitstream = array.array('B')
-    buf = 0
-    count = 0
+    #buff = 0
+    #count = 0
 
-    for bit in string:
-        if bit == '0':
-            buf = (buf << 1)
-        else:
-            buf = (buf << 1) | 1
-        count += 1
-        if count == 8:
-            bitstream.append(buf)
-            count = 0
-            buf = 0
-    bitstream.append(buf)
+    for i in range(0, len(string) - 1, 8):
+        j = i + 8
+        diff = 0
+        last = False
+        if j > len(string):
+            j = len(string)
+            last = True
+            diff = 8 - len(string[i:j])
+        byte = int(string[i:j], 2)
+        bitstream.append(byte)
+        if last:
+            bitstream.append(diff)
+
+    # for bit in string:
+    #     if bit == '0':
+    #         buff = (buff << 1)
+    #     else:
+    #         buff = (buff << 1) | 0x01
+    #     count += 1
+    #     if count == 8:
+    #         bitstream.append(buff)
+    #         count = 0
+    #         buff = 0
+    #
+    # if count != 0:
+    #     bitstream.append(buff << (8 - count))
     return (bitstream, tree)
 
-def decompress(string, decoderRing):
-    buf = 0
-    for bit in string:
-        if bit == 0:
-            buf = (buf >> 1)
-    raise NotImplementedError
+
+def binary(s):
+    return str(s) if s <= 1 else binary(s >> 1) + str(s & 1)
+
+
+# code >> (1) & 1 ?
+def decompress(bitstream, decoderRing):
+    bitstream = array.array('B', bitstream)
+
+    diff = bitstream.pop() # disparity of bits of last element relative to byte
+
+    string = ''
+    for (i, byte) in enumerate(bitstream):
+        bits = binary(byte)
+        if i == len(bitstream) - 1:
+            bits = ('0' * diff) + bits
+        string += bits
+    return decode(string, decoderRing)
+
 
 def usage():
     sys.stderr.write("Usage: {} [-c|-d|-v|-w] infile outfile\n".format(sys.argv[0]))
     exit(1)
+
 
 if __name__=='__main__':
     if len(sys.argv) != 4:
