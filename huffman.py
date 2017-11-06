@@ -21,7 +21,9 @@ def traverse(tree, bincode = '', codes = {}):
             codes[subtree[1]] = bincode
         else:
             traverse(subtree[1], bincode, codes)
+
         bincode = bincode[:-1]
+
     return codes
 
 
@@ -32,6 +34,7 @@ def code(msg):
 
     # Invariant (init): unique characters and number of occurrences in msg
     chars = {}
+
     # take count of unique characters in msg
     for c in msg:
         if c not in chars:
@@ -42,6 +45,7 @@ def code(msg):
 
     # Invariant (init): binary tree representation of msg
     tree = []
+
     # build the initial forest
     for (char, count) in chars.items():
         x = (count, char) # (frequency, subtree)
@@ -81,6 +85,7 @@ def decode(string, decoderRing):
     msg = ''
     codes = traverse(decoderRing)
     bincode = ''
+
     for bit in string:
         bincode += bit
         if bincode in codes.values():
@@ -88,42 +93,37 @@ def decode(string, decoderRing):
                 if code == bincode:
                     msg += char
             bincode = ''
+
     return msg
 
 
 def compress(msg):
-    string, tree = code(msg); print(string)
+    string, tree = code(msg)
 
     bitstream = array.array('B')
-    #buff = 0
-    #count = 0
 
     for i in range(0, len(string) - 1, 8):
         j = i + 8
         diff = 0
         last = False
+
         if j > len(string):
             j = len(string)
             last = True
-            diff = 8 - len(string[i:j])
+            for bit in string[i:j]:
+                if bit == '0':
+                    diff += 1
+                else:
+                    break
+
         byte = int(string[i:j], 2)
         bitstream.append(byte)
+        print(byte); print(string[i:j])
+
         if last:
             bitstream.append(diff)
+            print("diff: " + str(diff))
 
-    # for bit in string:
-    #     if bit == '0':
-    #         buff = (buff << 1)
-    #     else:
-    #         buff = (buff << 1) | 0x01
-    #     count += 1
-    #     if count == 8:
-    #         bitstream.append(buff)
-    #         count = 0
-    #         buff = 0
-    #
-    # if count != 0:
-    #     bitstream.append(buff << (8 - count))
     return (bitstream, tree)
 
 
@@ -135,14 +135,19 @@ def binary(s):
 def decompress(bitstream, decoderRing):
     bitstream = array.array('B', bitstream)
 
-    diff = bitstream.pop() # disparity of bits of last element relative to byte
+    # disparity of bits of last element relative to size of byte
+    diff = bitstream.pop()
 
     string = ''
     for (i, byte) in enumerate(bitstream):
         bits = binary(byte)
-        if i == len(bitstream) - 1:
+        if len(bits) < 8 and i != len(bitstream) - 1:
+            bits = ('0' * (8 - len(bits))) + bits
+        else:
             bits = ('0' * diff) + bits
         string += bits
+        print(bits)
+
     return decode(string, decoderRing)
 
 
