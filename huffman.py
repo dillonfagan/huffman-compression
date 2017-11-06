@@ -141,7 +141,7 @@ def decompress(bitstream, decoderRing):
     string = ''
     for (i, byte) in enumerate(bitstream):
         bits = binary(byte)
-        if len(bits) < 8 and i != len(bitstream) - 1:
+        if i < len(bitstream) - 1:
             bits = ('0' * (8 - len(bits))) + bits
         else:
             bits = ('0' * diff) + bits
