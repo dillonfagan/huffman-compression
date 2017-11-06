@@ -118,20 +118,19 @@ def compress(msg):
 
         byte = int(string[i:j], 2)
         bitstream.append(byte)
-        print(byte); print(string[i:j])
 
         if last:
             bitstream.append(diff)
-            print("diff: " + str(diff))
 
     return (bitstream, tree)
 
-
+'''
+Returns a binary string given an integer s.
+'''
 def binary(s):
     return str(s) if s <= 1 else binary(s >> 1) + str(s & 1)
 
 
-# code >> (1) & 1 ?
 def decompress(bitstream, decoderRing):
     bitstream = array.array('B', bitstream)
 
@@ -146,7 +145,6 @@ def decompress(bitstream, decoderRing):
         else:
             bits = ('0' * diff) + bits
         string += bits
-        print(bits)
 
     return decode(string, decoderRing)
 
